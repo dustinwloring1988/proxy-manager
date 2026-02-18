@@ -1,3 +1,6 @@
+
+<img width="1154" height="649" alt="cover" src="https://github.com/user-attachments/assets/a7bede37-ff16-4535-aa07-03b3070d97f7" />
+
 # Proxy Manager
 
 A reverse proxy management system with a web UI for managing proxy hosts and SSL certificates.
