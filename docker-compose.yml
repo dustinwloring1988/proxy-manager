@@ -1,0 +1,73 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: pm-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+      - pm-data:/data
+      - nginx-sites:/etc/nginx/sites-enabled
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    networks:
+      - pm-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: pm-frontend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - pm-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: pm-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx-sites:/etc/nginx/sites-enabled
+      - nginx-conf:/etc/nginx/conf.d
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    depends_on:
+      - backend
+    networks:
+      - pm-network
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: pm-certbot
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $$!; done"
+    networks:
+      - pm-network
+
+volumes:
+  pm-data:
+  nginx-sites:
+  nginx-conf:
+  letsencrypt:
+  certbot-webroot:
+
+networks:
+  pm-network:
+    driver: bridge

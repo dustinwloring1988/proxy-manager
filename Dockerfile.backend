@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY shared/package*.json ./shared/
+COPY backend/package*.json ./backend/
+
+RUN apk add --no-cache certbot nginx make gcc g++ python3 musl-dev
+
+RUN npm install -g typescript ts-node
+
+WORKDIR /app/backend
+
+RUN npm install
+
+COPY backend/src ./src
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

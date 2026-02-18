@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY shared/package*.json ./shared/
+COPY frontend/package*.json ./frontend/
+
+RUN npm install -g vite
+
+WORKDIR /app/frontend
+
+RUN npm install
+
+COPY frontend/src ./src
+COPY frontend/index.html ./
+COPY frontend/vite.config.ts ./
+COPY frontend/tsconfig*.json ./
+
+EXPOSE 3001
+
+CMD ["npm", "run", "dev", "--", "--host"]
